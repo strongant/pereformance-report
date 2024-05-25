@@ -1,0 +1,13 @@
+[Unit]
+Description=A simple Flask app
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/your/flask_project
+Environment="PATH=/path/to/your/flask_project/venv/bin"
+ExecStart=/path/to/your/flask_project/venv/bin/gunicorn --workers 3 --bind unix:flaskapp.sock -m 007 app:app
+
+[Install]
+WantedBy=multi-user.target
