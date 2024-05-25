@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="553ace78-3b5b-4330-a0de-132dee56d65e" name="Changes" comment="添加启动脚本">
+    <list default="true" id="553ace78-3b5b-4330-a0de-132dee56d65e" name="Changes" comment="添加案例数据">
+      <change afterPath="$PROJECT_DIR$/import.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,6 +59,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/apple/PycharmProjects/pereformance-report",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -69,6 +69,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="RunManager" selected="Flask server.Flask (app.py)">
     <configuration name="Flask (app.py)" type="Python.FlaskServer" temporary="true" nameIsGenerated="true">
       <module name="pereformance-report" />
@@ -123,7 +128,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1716613948437</updated>
-      <workItem from="1716613968881" duration="9307000" />
+      <workItem from="1716613968881" duration="9466000" />
     </task>
     <task id="LOCAL-00001" summary="实现性能测试数据展示以及上传功能">
       <option name="closed" value="true" />
@@ -157,7 +162,23 @@
       <option name="project" value="LOCAL" />
       <updated>1716622964320</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="版本修改为动态">
+      <option name="closed" value="true" />
+      <created>1716625447931</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1716625447931</updated>
+    </task>
+    <task id="LOCAL-00006" summary="添加案例数据">
+      <option name="closed" value="true" />
+      <created>1716625537378</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1716625537378</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -167,9 +188,11 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="实现性能测试数据展示以及上传功能" />
     <MESSAGE value="添加启动脚本" />
-    <option name="LAST_COMMIT_MESSAGE" value="添加启动脚本" />
+    <MESSAGE value="版本修改为动态" />
+    <MESSAGE value="添加案例数据" />
+    <option name="LAST_COMMIT_MESSAGE" value="添加案例数据" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/pereformance_report$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1716625343136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pereformance_report$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1716625408898" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

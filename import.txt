@@ -1,0 +1,14 @@
+GVM kernel start 4925ms
+Start alps-bootanimation 9436ms
+Start alps HUD 9980ms
+boot_progress_start 6086ms
+boot_progress_preload_start 6970ms
+boot_progress_preload_end 8439ms
+boot_progress_system_run 8836ms
+boot_progress_pms_start 10078ms
+boot_progress_pms_system_scan_start 10318ms
+boot_progress_pms_data_scan_start 10759ms
+boot_progress_pms_scan_end 10798ms
+boot_progress_pms_ready 10991ms
+boot_progress_ams_ready 12867ms
+boot_progress_enable_screen 15709ms
