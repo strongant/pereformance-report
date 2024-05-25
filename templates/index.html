@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>数据看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center; /* 标题居中 */
+        }
+        .outer-container {
+            display: flex;
+            justify-content: center; /* 外容器居中对齐 */
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            gap: 10px; /* 调整下拉框之间的间距 */
+        }
+        .container div {
+            display: flex;
+            align-items: center;
+        }
+        .container span {
+            margin-right: 5px; /* 调整标签和下拉框之间的间距 */
+        }
+        .container select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #chart {
+            width: 80%;
+            height: 400px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+   <h1>性能数据看板</h1>
+    <div class="outer-container">
+        <div class="container">
+            <div>
+                <span>平台</span>
+                <select id="platform" name="platform">
+                    <option value="Apls">Apls</option>
+                    <option value="NIO">NIO</option>
+                </select>
+            </div>
+            <div>
+                <span>分支</span>
+                <select id="branch" name="branch">
+                    <option value="DEV">DEV</option>
+                    <option value="stage">stage</option>
+                </select>
+            </div>
+            <div>
+                <span>数据类型</span>
+                <select id="testType" name="testType">
+                    <option value="开机时序">开机时序</option>
+                    <option value="安兔兔">安兔兔</option>
+                    <option value="CPU资源">CPU资源</option>
+                </select>
+            </div>
+            <div>
+                <span>版本</span>
+                <select id="version" name="version">
+                    <option value="V1">V1</option>
+                </select>
+            </div>
+            <button onclick="updateChart()">查询</button>
+
+        </div>
+    </div>
+    <div id="chart"></div>
+
+<script>
+    var chart = echarts.init(document.getElementById('chart'));
+
+    function updateChart() {
+        var platform = $('#platform').val();
+        var branch = $('#branch').val();
+        var testType = $('#testType').val();
+        var version = $('#version').val();
+
+        $.ajax({
+            url: "/get_report_data",
+            type: "GET",
+            data: {
+                platform: platform,
+                branch: branch,
+                test_type: testType,
+                version: version
+            },
+            success: function (res) {
+                var test_categories = res.map(function (item) {
+                    return item.category;
+                });
+
+                var test_values = res.map(function (item) {
+                    return item.value;
+                });
+
+                var option = {
+                    title: {
+                        text: '性能数据'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: test_categories
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        name: '值',
+                        type: 'line',
+                        data: test_values
+                    }]
+                };
+
+                chart.setOption(option);
+            }
+        });
+    }
+
+    // 在页面加载完成后自动查询一次
+    $(document).ready(function() {
+        updateChart();
+    });
+
+</script>
+</body>
+</html>
