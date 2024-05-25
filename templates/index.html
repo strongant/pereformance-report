@@ -90,7 +90,7 @@
         <div>
             <span>版本</span>
             <select id="version" name="version">
-                <option value="V1">V1</option>
+                <option value="">全部</option>
             </select>
         </div>
         <button onclick="updateChart()">查询</button>
@@ -118,14 +118,36 @@
                 version: version
             },
             success: function (res) {
-                var test_categories = res.map(function (item) {
-                    return item.category;
+                // 分组数据
+                var groupedByVersion = {};
+                res.forEach(function (item) {
+                    var version = item.version;
+                    if (!groupedByVersion[version]) {
+                        groupedByVersion[version] = {
+                            categories: [],
+                            values: []
+                        };
+                    }
+                    groupedByVersion[version].categories.push(item.category);
+                    groupedByVersion[version].values.push(item.value);
                 });
 
-                var test_values = res.map(function (item) {
-                    return item.value;
-                });
+                // 构建系列数据
+                var seriesData = [];
 
+
+                for (var version in groupedByVersion) {
+                    console.log("groupedByVersion:" + version)
+
+                    // 仅当version和用户选择的版本相同时，才添加到系列数据中
+                    seriesData.push({
+                        name: version,
+                        type: 'line',
+                        data: groupedByVersion[version].values
+                    });
+                }
+
+                // 构建选项
                 var option = {
                     title: {
                         text: '性能数据'
@@ -135,7 +157,10 @@
                     },
                     xAxis: {
                         type: 'category',
-                        data: test_categories
+                        // 这将所有版本的类别整合在一起
+                        data: [].concat.apply([], Object.values(groupedByVersion).map(function (item) {
+                            return item.categories;
+                        }))
                     },
                     yAxis: {
                         type: 'value',
@@ -143,20 +168,29 @@
                             formatter: '{value} ms'  // 设置 y 轴单位
                         }
                     },
-                    series: [{
-                        name: '值',
-                        type: 'line',
-                        data: test_values
-                    }]
+                    // 使用构建的系列数据
+                    series: seriesData
                 };
 
-                chart.setOption(option);
+                chart.setOption(option,true);
             }
         });
     }
 
     // 在页面加载完成后自动查询一次
     $(document).ready(function () {
+        var platform = $('#platform').val();
+        var branch = $('#branch').val();
+        var testType = $('#testType').val();
+        // 获取版本
+        $.getJSON("/versions", {"platform": platform, "branch": branch, "testType": testType}, function (data) {
+            var versionSelect = $('#version');
+            $.each(data, function (index, value) {
+                versionSelect.append($('<option></option>').attr('value', value).text(value));
+            });
+            $('#version').select(0);
+        });
+
         updateChart();
     });
 

@@ -37,15 +37,33 @@ def get_test_data():
     test_type = request.args.get('test_type')
     version = request.args.get('version')
 
-    test_data = TestData.query.filter_by(platform=platform, branch=branch, test_type=test_type, version=version).all()
-    result = [{"category": data.test_category, "value": data.test_value} for data in test_data]
+    query = TestData.query
 
+    if platform:
+        query = query.filter(TestData.platform == platform)
+    if branch:
+        query = query.filter(TestData.branch == branch)
+    if test_type:
+        query = query.filter(TestData.test_type == test_type)
+    if version:
+        query = query.filter(TestData.version == version)
+
+    test_data = query.all()
+    result = [{"category": data.test_category, "value": data.test_value, "version": data.version}
+              for data in test_data]
     return jsonify(result)
 
 
 @app.route('/upload')
 def upload():
     return render_template('upload.html')
+
+
+@app.route('/versions', methods=['GET'])
+def get_versions():
+    versions = db.session.query(TestData.version).distinct().all()
+    result = [version[0] for version in versions]
+    return jsonify(result)
 
 
 @app.route('/upload_data', methods=['POST'])
