@@ -97,7 +97,7 @@
                 window.location.reload(); // 1秒后刷新页面
             }, 1000); // 1000毫秒 = 1秒
         } else {
-            messageElement.textContent = '版本创建失败';
+            messageElement.textContent = '版本创建失败，:' + response.error;
             messageElement.style.color = 'red';
         }
     }
