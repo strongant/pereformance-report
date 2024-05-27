@@ -64,40 +64,43 @@
     </style>
 </head>
 <body>
-    <h1>创建新版本</h1>
-    <form id="createVersionForm">
-        <label for="versionName">版本名称:</label>
-        <input type="text" id="versionName" name="versionName" required>
-        <button type="submit">创建版本</button>
-    </form>
-    <p id="message"></p>
+<h1>创建新版本</h1>
+<form id="createVersionForm">
+    <label for="versionName">版本名称:</label>
+    <input type="text" id="versionName" name="versionName" required>
+    <button type="submit">创建版本</button>
+</form>
+<p id="message"></p>
 
-    <script>
-        document.getElementById('createVersionForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // 阻止表单的默认提交行为
-            const versionName = document.getElementById('versionName').value;
-            createVersion(versionName);
+<script>
+    document.getElementById('createVersionForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        const versionName = document.getElementById('versionName').value;
+        createVersion(versionName);
+    });
+
+    async function createVersion(versionName) {
+        const response = await fetch('/versions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: versionName})
         });
 
-        async function createVersion(versionName) {
-            const response = await fetch('/versions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name: versionName })
-            });
+        const messageElement = document.getElementById('message');
 
-            const messageElement = document.getElementById('message');
-
-            if (response.ok) {
-                messageElement.textContent = '版本创建成功';
-                messageElement.style.color = 'green';
-            } else {
-                messageElement.textContent = '版本创建失败';
-                messageElement.style.color = 'red';
-            }
+        if (response.ok) {
+            messageElement.textContent = '版本创建成功';
+            messageElement.style.color = 'green';
+            setTimeout(() => {
+                window.location.reload(); // 1秒后刷新页面
+            }, 1000); // 1000毫秒 = 1秒
+        } else {
+            messageElement.textContent = '版本创建失败';
+            messageElement.style.color = 'red';
         }
-    </script>
+    }
+</script>
 </body>
 </html>
