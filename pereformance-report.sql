@@ -67,9 +67,6 @@ INSERT INTO `test_data` (`id`, `platform`, `branch`, `test_type`, `version`, `te
 INSERT INTO `test_data` (`id`, `platform`, `branch`, `test_type`, `version`, `test_category`, `test_value`, `value_unit`) VALUES (55, 'Apls', 'dev', '开机时序', 'V2', 'boot_progress_enable_screen', 4709, 'ms');
 COMMIT;
 
--- ----------------------------
--- Table structure for versions
--- ----------------------------
 DROP TABLE IF EXISTS `versions`;
 CREATE TABLE `versions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -77,9 +74,6 @@ CREATE TABLE `versions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- ----------------------------
--- Records of versions
--- ----------------------------
 BEGIN;
 INSERT INTO `versions` (`id`, `name`) VALUES (1, 'V1');
 INSERT INTO `versions` (`id`, `name`) VALUES (2, 'V2');
