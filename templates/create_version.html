@@ -97,7 +97,9 @@
                 window.location.reload(); // 1秒后刷新页面
             }, 1000); // 1000毫秒 = 1秒
         } else {
-            messageElement.textContent = '版本创建失败，:' + response.error;
+            // 如果创建失败，显示从服务器返回的错误消息
+            const errorData = await response.json();
+            messageElement.textContent = `版本创建失败: ${errorData.error}`;
             messageElement.style.color = 'red';
         }
     }
