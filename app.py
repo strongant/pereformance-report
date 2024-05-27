@@ -52,14 +52,20 @@ def create_version():
         data = request.get_json()
         version_name = data.get('name', None)
         if version_name:
+            # 检查版本是否已存在
+            existing_version = Version.query.filter_by(name=version_name).first()
+            if existing_version:
+                return jsonify({"error": "版本已存在"}), 400
+
+            # 如果版本不存在，则创建新版本
             new_version = Version(name=version_name)
             db.session.add(new_version)
             db.session.commit()
             return jsonify(new_version.to_dict()), 201
         else:
-            return jsonify({"error": "Invalid input"}), 400
+            return jsonify({"error": "无效的输入"}), 400
     else:
-        return jsonify({"error": "Invalid input format, expected JSON"}), 400
+        return jsonify({"error": "无效的输入格式，期望为 JSON"}), 400
 
 # 查询所有版本
 @app.route('/versions', methods=['GET'])
