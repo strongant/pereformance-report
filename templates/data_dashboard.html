@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>数据看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f06, #4a90e2);
+            color: #fff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 2em;
+        }
+
+        .outer-container {
+            width: 80%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 15px; /* 调整下拉框和按钮之间的间距 */
+            margin-bottom: 20px;
+        }
+
+        .container div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container span {
+            margin-bottom: 5px; /* 调整标签和下拉框之间的间距 */
+        }
+
+        .container select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .container button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .container button:hover {
+            background-color: #0056b3;
+        }
+
+        #chart {
+            width: 100%;
+            height: 400px;
+            background: #fff; /* 白色背景以便清晰展示数据 */
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+<h1>性能数据看板</h1>
+<div class="outer-container">
+    <div class="container">
+        <div>
+            <span>平台</span>
+            <select id="platform" name="platform">
+                <option value="Apls">Apls</option>
+                <option value="NIO">NIO</option>
+            </select>
+        </div>
+        <div>
+            <span>分支</span>
+            <select id="branch" name="branch">
+                <option value="dev">DEV</option>
+                <option value="stage">STAGE</option>
+            </select>
+        </div>
+        <div>
+            <span>数据类型</span>
+            <select id="testType" name="testType">
+                <option value="开机时序">开机时序</option>
+                <option value="安兔兔">安兔兔</option>
+                <option value="CPU资源">CPU资源</option>
+            </select>
+        </div>
+
+        <div>
+            <span>测试项</span>
+            <select id="testCategory" name="testCategory" multiple>
+                <!-- 动态填充测试项目 -->
+            </select>
+        </div>
+        <div class="control-buttons">
+            <button type="button" id="select-testcategory-all">全选</button>
+            <button type="button" id="deselect-testcategory-all">反选</button>
+            <button type="button" id="deselect-testcategory">不选</button>
+        </div>
+
+        <div>
+            <span>版本</span>
+            <select id="version" name="version" multiple>
+            </select>
+        </div>
+
+        <div class="control-buttons">
+            <button type="button" id="select-all">全选</button>
+            <button type="button" id="deselect-all">反选</button>
+            <button type="button" id="deselect">不选</button>
+        </div>
+
+        <button onclick="updateChart()">查询</button>
+
+    </div>
+</div>
+<div id="chart"></div>
+
+<script>
+    var chart = echarts.init(document.getElementById('chart'));
+
+
+    function updateChart() {
+        var platform = $('#platform').val();
+        var branch = $('#branch').val();
+        var testType = $('#testType').val();
+        var testCategories = $('#testCategory').val();
+        var versions = $('#version').val();
+
+        $.ajax({
+            url: "/get_report_data",
+            type: "GET",
+            data: {
+                platform: platform,
+                branch: branch,
+                test_type: testType,
+                test_category: testCategories ? testCategories.join(',') : '',
+                version: versions ? versions.join(',') : ''
+            },
+            success: function (res) {
+                var dataByVersion = {};
+                var categories = new Set();
+                var units = {};
+
+                // 按版本组织数据
+                res.forEach(function (item) {
+                    if (!dataByVersion[item.version]) {
+                        dataByVersion[item.version] = {};
+                    }
+                    dataByVersion[item.version][item.category] = item.value;
+                    units[item.category] = item.value_unit;
+                    categories.add(item.category);
+                });
+
+                // 构建x轴（所有版本）和系列数据（每个测试项）
+                var versionsArray = Object.keys(dataByVersion);
+                var categoriesArray = Array.from(categories);
+                var seriesData = categoriesArray.map(function (category) {
+                    return {
+                        name: category,
+                        type: 'line',
+                        data: versionsArray.map(function (version) {
+                            return dataByVersion[version][category] || null;
+                        })
+                    };
+                });
+
+                var minY = Math.min(...res.map(item => item.value));
+                var maxY = Math.max(...res.map(item => item.value));
+                var padding = (maxY - minY) * 0.1;
+
+                // 假设所有测试项使用相同的单位，以下代码提取第一个测试项的单位作为示例
+                var unit = units[categoriesArray[0]] || '';
+
+                var option = {
+                    title: {
+                        text: '性能数据'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            var value = params.value !== null ? params.value : '无数据';
+                            return `${params.seriesName}: ${value} ${(units[params.seriesName] || '')}`;
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: versionsArray
+                    },
+                    yAxis: {
+                        type: 'value',
+                        min: minY - padding,
+                        max: maxY + padding,
+                        splitNumber: 10, // 设定Y轴的分割段数，确保间距适当
+                        axisLabel: {
+                            formatter: function (value) {
+                                return value + ' ' + unit; // 动态显示单位
+                            }
+                        }
+                    },
+                    series: seriesData
+                };
+
+                chart.setOption(option, true);
+            }
+        });
+    }
+
+    // 在页面加载完成后自动查询一次
+    $(document).ready(function () {
+
+
+        var platform = $('#platform').val();
+        var branch = $('#branch').val();
+        var testType = $('#testType').val();
+
+
+        // 获取版本
+        $.getJSON("/versions", {"platform": platform, "branch": branch, "testType": testType}, function (data) {
+            var versionSelect = $('#version');
+            $.each(data, function (index, value) {
+                versionSelect.append($('<option></option>').attr('value', value.name).text(value.name));
+            });
+
+            $('#version option').prop('selected', true); // 默认全选
+
+            // 触发 change 事件，以确保选项的改变被捕捉
+            $('#version').change();
+        });
+
+
+        // 获取测试项
+        $.getJSON("/test_categories", function (data) {
+            var testCategorySelect = $('#testCategory');
+            $.each(data, function (index, value) {
+                testCategorySelect.append($('<option></option>').attr('value', value).text(value));
+            });
+
+            $('#testCategory option').prop('selected', true); // 默认全选
+
+            // 触发 change 事件，以确保选项的改变被捕捉
+            $('#testCategory').change();
+        });
+
+        // 版本控制按钮
+        $('#select-all').on('click', function () {
+            $('#version option').prop('selected', true);
+        });
+
+        $('#deselect-all').on('click', function () {
+            $('#version option').each(function () {
+                this.selected = !this.selected;
+            });
+        });
+
+        $('#deselect').on('click', function () {
+            $('#version option').prop('selected', false);
+        });
+
+        // 测试项控制按钮
+        $('#select-testcategory-all').on('click', function () {
+            $('#testCategory option').prop('selected', true);
+        });
+
+        $('#deselect-testcategory-all').on('click', function () {
+            $('#testCategory option').each(function () {
+                this.selected = !this.selected;
+            });
+        });
+
+        $('#deselect-testcategory').on('click', function () {
+            $('#testCategory option').prop('selected', false);
+        });
+
+
+        updateChart();
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据看板上传</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f06, #4a90e2);
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        #upload_form {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+        }
+
+        label {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>数据看板上传</h1>
+    <form id="upload_form" enctype="multipart/form-data">
+        <label>
+            平台：
+            <select name="platform" id="platform">
+                <option value="Apls" selected>Apls</option>
+                <option value="NIO">NIO</option>
+                <!-- 你可以在此处列出所有的平台 -->
+            </select>
+        </label>
+        <label>
+            分支：
+            <select name="branch" id="branch">
+                <option value="dev" selected>DEV</option>
+                <option value="stage">Stage</option>
+                <!-- 在此处列出所有的分支 -->
+            </select>
+        </label>
+        <label>
+            数据类型：
+            <select name="test_type" id="test_type">
+                <option value="开机时序" selected>开机时序</option>
+                <option value="安兔兔">安兔兔</option>
+                <option value="CPU资源">CPU资源</option>
+            </select>
+        </label>
+        <label>
+            版本：
+            <select name="version" id="version">
+                <!-- 版本列表会在加载时自动填充 -->
+            </select>
+        </label>
+        <input type="file" name="data" id="data" accept=".txt">
+        <button type="submit">上传</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // 获取所有版本的API调用
+            $.ajax({
+                url: '/versions',
+                type: 'GET',
+                success: function (response) {
+                    var versionSelect = $('#version');
+                    response.forEach(function (version) {
+                        versionSelect.append(new Option(version.name, version.name));
+                    });
+                },
+                error: function (error) {
+                    console.error("Error fetching versions:", error);
+                }
+            });
+
+            $('#upload_form').on('submit', function (e) {
+                e.preventDefault();
+                var file_data = $('#data').prop('files')[0];
+                var form_data = new FormData();
+                form_data.append('file', file_data);
+                form_data.append('platform', $('#platform').val());
+                form_data.append('branch', $('#branch').val());
+                form_data.append('test_type', $('#test_type').val());
+                form_data.append('version', $('#version').val());
+
+                $.ajax({
+                    url: '/upload_data',
+                    type: 'POST',
+                    data: form_data,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        alert("上传成功！");
+                    },
+                    error: function (response) {
+                        alert("上传失败！" + response);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

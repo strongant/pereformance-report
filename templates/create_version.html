@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建版本</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f06, #4a90e2);
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+        }
+
+        label, input {
+            margin-bottom: 15px;
+            display: block;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #message {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>创建新版本</h1>
+    <form id="createVersionForm">
+        <label for="versionName">版本名称:</label>
+        <input type="text" id="versionName" name="versionName" required>
+        <button type="submit">创建版本</button>
+    </form>
+    <p id="message"></p>
+
+    <script>
+        document.getElementById('createVersionForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 阻止表单的默认提交行为
+            const versionName = document.getElementById('versionName').value;
+            createVersion(versionName);
+        });
+
+        async function createVersion(versionName) {
+            const response = await fetch('/version', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: versionName })
+            });
+
+            const messageElement = document.getElementById('message');
+
+            if (response.ok) {
+                messageElement.textContent = '版本创建成功';
+                messageElement.style.color = 'green';
+            } else {
+                messageElement.textContent = '版本创建失败';
+                messageElement.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>
