@@ -110,7 +110,7 @@ def get_test_data():
         test_categories_list = testCategories.split(',')
         query = query.filter(TestData.test_category.in_(test_categories_list))
 
-    test_data = query.all()
+    test_data = query.order_by(TestData.version).all()
     result = [{"category": data.test_category, "value": data.test_value, "version": data.version,
                "value_unit": data.value_unit
                }
