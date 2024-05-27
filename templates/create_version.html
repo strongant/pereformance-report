@@ -80,7 +80,7 @@
         });
 
         async function createVersion(versionName) {
-            const response = await fetch('/version', {
+            const response = await fetch('/versions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
