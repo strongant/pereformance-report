@@ -12,7 +12,7 @@ from pyecharts.charts import Line
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://test:test@localhost/pereformance-report'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://test:test@localhost/pereformance_report'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MYSQL_DATABASE_CHARSET'] = 'utf8mb4'
 
