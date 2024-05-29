@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="553ace78-3b5b-4330-a0de-132dee56d65e" name="Changes" comment="数据展示优化以及样式调整">
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/data_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/data_dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +129,7 @@
       <option name="presentableId" value="Default" />
       <updated>1716613948437</updated>
       <workItem from="1716613968881" duration="10640000" />
-      <workItem from="1716816392674" duration="9832000" />
+      <workItem from="1716816392674" duration="10895000" />
     </task>
     <task id="LOCAL-00001" summary="实现性能测试数据展示以及上传功能">
       <option name="closed" value="true" />
@@ -258,7 +259,15 @@
       <option name="project" value="LOCAL" />
       <updated>1716827715049</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="数据展示优化以及样式调整">
+      <option name="closed" value="true" />
+      <created>1716827961188</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1716827961188</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -285,6 +294,6 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/pereformance_report$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1716826429141" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pereformance_report$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1716994882864" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

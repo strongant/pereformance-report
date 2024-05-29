@@ -135,9 +135,12 @@
     </div>
 </div>
 <div id="chart"></div>
+<div id="comparisonChart"
+     style="width: 100%; height: 400px; background: #fff; margin-top: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"></div>
 
 <script>
     var chart = echarts.init(document.getElementById('chart'));
+    var comparisonChart = echarts.init(document.getElementById('comparisonChart'));
 
 
     function updateChart() {
@@ -187,7 +190,7 @@
 
                 var minY = Math.min(...res.map(item => item.value));
                 var maxY = Math.max(...res.map(item => item.value));
-                var padding = (maxY - minY) * 0.1;
+                var padding = 0;
 
                 // 假设所有测试项使用相同的单位，以下代码提取第一个测试项的单位作为示例
                 var unit = units[categoriesArray[0]] || '';
@@ -222,6 +225,65 @@
                 };
 
                 chart.setOption(option, true);
+
+
+                // 第二个折线图数据整理
+                var dataByCategoryAndVersion = {};
+                versionsArray.forEach(function (version) {
+                    var data = res.filter(item => item.version === version);
+                    data.forEach(function (item) {
+                        if (!dataByCategoryAndVersion[item.category]) {
+                            dataByCategoryAndVersion[item.category] = {};
+                        }
+                        dataByCategoryAndVersion[item.category][version] = item.value;
+                    });
+                });
+
+                var comparisonSeriesData = versionsArray.map(function (version) {
+                    return {
+                        name: version,
+                        type: 'line',
+                        data: categoriesArray.map(function (category) {
+                            return dataByCategoryAndVersion[category][version] || null;
+                        })
+                    };
+                });
+
+                var minComparisonY = Math.min(...res.map(item => item.value));
+                var maxComparisonY = Math.max(...res.map(item => item.value));
+                var padding = 0;
+
+                var comparisonOption = {
+                    title: {
+                        text: '性能对比'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            var value = params.value !== null ? params.value : '无数据';
+                            var category = params.name;
+                            return `版本: ${params.seriesName}<br/>测试项: ${category}<br/>值: ${value} ${(units[category] || '')}`;
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: categoriesArray
+                    },
+                    yAxis: {
+                        type: 'value',
+                        min: minComparisonY - padding,
+                        max: maxComparisonY + padding,
+                        axisLabel: {
+                            formatter: function (value) {
+                                return value + ' ' + (units[categoriesArray[0]] || '');
+                            }
+                        }
+                    },
+                    series: comparisonSeriesData
+                };
+
+                comparisonChart.setOption(comparisonOption, true);
+
             }
         });
     }
