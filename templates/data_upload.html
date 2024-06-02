@@ -88,10 +88,8 @@
 
          <label>
             数据类型：
-            <select name="test_type" id="test_type">
-                <option value="开机时序" selected>开机时序</option>
-                <option value="安兔兔">安兔兔</option>
-                <option value="CPU资源">CPU资源</option>
+            <select name="test_type" id="test_type" disabled>
+                <option value="" selected disabled>选择数据类型</option>
             </select>
         </label>
 
@@ -114,6 +112,22 @@
                 },
                 error: function (error) {
                     console.error("Error fetching platforms:", error);
+                }
+            });
+
+            // 获取所有测试类型的API调用
+            $.ajax({
+                url: '/get_test_types',
+                type: 'GET',
+                success: function (response) {
+                    var testTypeSelect = $('#test_type');
+                    response.forEach(function (testType) {
+                        testTypeSelect.append(new Option(testType.name, testType.id));
+                    });
+                    testTypeSelect.prop('disabled', false);
+                },
+                error: function (error) {
+                    console.error("Error fetching test types:", error);
                 }
             });
 

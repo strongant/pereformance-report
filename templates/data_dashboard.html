@@ -77,6 +77,40 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        #dataTableContainer {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            color: black; /* 确保文字颜色是黑色 */
+
+        }
+
+        table th,
+        table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background: #f2f2f2;
+            text-align: left;
+        }
+
+        table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background: #f1f1f1;
+        }
     </style>
 </head>
 <body>
@@ -86,23 +120,20 @@
         <div>
             <span>平台</span>
             <select id="platform" name="platform">
-                <option value="Apls">Apls</option>
-                <option value="NIO">NIO</option>
+                <option value="" selected disabled>选择平台</option>
             </select>
         </div>
         <div>
             <span>分支</span>
             <select id="branch" name="branch">
-                <option value="dev">DEV</option>
-                <option value="stage">STAGE</option>
+                <option value="" selected disabled>选择分支</option>
             </select>
         </div>
         <div>
             <span>数据类型</span>
             <select id="testType" name="testType">
-                <option value="开机时序">开机时序</option>
-                <option value="安兔兔">安兔兔</option>
-                <option value="CPU资源">CPU资源</option>
+                <option value="" selected disabled>选择数据类型</option>
+                <!-- 数据类型选项将通过JavaScript动态加载 -->
             </select>
         </div>
 
@@ -134,6 +165,22 @@
 
     </div>
 </div>
+<!-- 新增的表格容器，用于展示查询结果 -->
+<div id="dataTableContainer">
+    <table id="dataTable">
+        <thead>
+        <tr>
+            <th>测试项</th>
+            <th>测试版本</th>
+            <th>测试值</th>
+            <th>测试单位</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 动态填充数据行 -->
+        </tbody>
+    </table>
+</div>
 <div id="chart"></div>
 <div id="comparisonChart"
      style="width: 100%; height: 400px; background: #fff; margin-top: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"></div>
@@ -150,6 +197,7 @@
         var testCategories = $('#testCategory').val();
         var versions = $('#version').val();
 
+
         $.ajax({
             url: "/get_report_data",
             type: "GET",
@@ -161,9 +209,62 @@
                 version: versions ? versions.join(',') : ''
             },
             success: function (res) {
+
+                // 动态生成表头
+                var table = document.getElementById('dataTable');
+                table.innerHTML = '';  // 清空现有表格内容
+
+                // 新增表头行
+                var thead = table.createTHead();
+                var headerRow = thead.insertRow(0);
+                var cellTestCategory = headerRow.insertCell(0);
+                var cellTestVersion = headerRow.insertCell(1);
+                var cellTestValue = headerRow.insertCell(2);
+                var cellValueUnit = headerRow.insertCell(3);
+
+                cellTestCategory.textContent = '测试项';
+                cellTestVersion.textContent = '测试版本';
+
+                cellTestValue.textContent = '测试值';
+                cellValueUnit.textContent = '测试单位';
+
+                // 收集所有测试类别
+                var testDataMap = {};
+                res.forEach(item => {
+                    if (!testDataMap[item.category]) {
+                        testDataMap[item.category] = {};
+                    }
+                    testDataMap[item.category][item.version] = {
+                        value: item.value,
+                        value_unit: item.value_unit
+                    };
+                });
+
+                // 获取所有 Unique 的 versions
+                var uniqueVersions = [...new Set(res.map(item => item.version))];
+
+                // 填充表格数据
+                var tbody = table.createTBody();
+                Object.keys(testDataMap).forEach(category => {
+                    uniqueVersions.forEach(version => {
+                        var row = tbody.insertRow();
+                        var cellTestCategory = row.insertCell(0);
+                        var cellTestVersion = row.insertCell(1);
+                        var cellTestValue = row.insertCell(2);
+                        var cellValueUnit = row.insertCell(3);
+
+                        cellTestCategory.textContent = category;
+                        cellValueUnit.textContent = testDataMap[category][version]?.value_unit || '';  // 如果value_unit为空则使用空字符串
+                        cellTestValue.textContent = testDataMap[category][version]?.value || '';  // 对应版本的测试值
+                        cellTestVersion.textContent = version;
+                    });
+                });
+
+
                 var dataByVersion = {};
                 var categories = new Set();
                 var units = {};
+
 
                 // 按版本组织数据
                 res.forEach(function (item) {
@@ -171,9 +272,16 @@
                         dataByVersion[item.version] = {};
                     }
                     dataByVersion[item.version][item.category] = item.value;
-                    units[item.category] = item.value_unit;
+                    units[item.category] = item.value_unit || '';
                     categories.add(item.category);
                 });
+
+                console.log("dataByVersion ");
+                console.log(dataByVersion);
+
+
+                console.log("categories ")
+                console.log(categories)
 
                 // 构建x轴（所有版本）和系列数据（每个测试项）
                 var versionsArray = Object.keys(dataByVersion);
@@ -183,7 +291,10 @@
                         name: category,
                         type: 'line',
                         data: versionsArray.map(function (version) {
-                            return dataByVersion[version][category] || null;
+                            console.log(dataByVersion[version][category])
+
+                            // 检查 dataByVersion[version] 是否存在以及 dataByVersion[version][category] 是否存在
+                            return (dataByVersion[version] && dataByVersion[version][category] !== undefined) ? dataByVersion[version][category] : null;
                         })
                     };
                 });
@@ -205,6 +316,15 @@
                             var value = params.value !== null ? params.value : '无数据';
                             return `${params.seriesName}: ${value} ${(units[params.seriesName] || '')}`;
                         }
+                    },
+                    legend: {
+
+                        data: seriesData, // 动态生成的测试项名称
+                        textStyle: {
+                            color: '#000' // 图例文字颜色
+                        },
+                        orient: 'horizontal', // 图例排列方向 (默认即为水平)
+                        bottom: 0 // 图例展示在底部
                     },
                     xAxis: {
                         type: 'category',
@@ -229,8 +349,10 @@
 
                 // 第二个折线图数据整理
                 var dataByCategoryAndVersion = {};
+
+// 构建数据 by category 和 version
                 versionsArray.forEach(function (version) {
-                    var data = res.filter(item => item.version === version);
+                    var data = res.filter(item => item.version == version);
                     data.forEach(function (item) {
                         if (!dataByCategoryAndVersion[item.category]) {
                             dataByCategoryAndVersion[item.category] = {};
@@ -239,13 +361,15 @@
                     });
                 });
 
+// 构建 comparisonSeriesData，确保每个版本的折线图都展示出来，即使测试项的值都一样
                 var comparisonSeriesData = versionsArray.map(function (version) {
                     return {
                         name: version,
                         type: 'line',
                         data: categoriesArray.map(function (category) {
-                            return dataByCategoryAndVersion[category][version] || null;
-                        })
+                            return (dataByCategoryAndVersion[category] && dataByCategoryAndVersion[category][version] !== undefined) ? dataByCategoryAndVersion[category][version] : null;
+                        }),
+                        showSymbol: true // 确保每个数据点都有标识
                     };
                 });
 
@@ -258,12 +382,25 @@
                         text: '性能对比'
                     },
                     tooltip: {
-                        trigger: 'item',
+                        trigger: 'axis', // 更改为 trigger 'axis' 以捕获所有折线图
                         formatter: function (params) {
-                            var value = params.value !== null ? params.value : '无数据';
-                            var category = params.name;
-                            return `版本: ${params.seriesName}<br/>测试项: ${category}<br/>值: ${value} ${(units[category] || '')}`;
+                            let tooltipText = '';
+                            params.forEach(param => {
+                                var value = param.value !== null ? param.value : '无数据';
+                                var category = param.name;
+                                tooltipText += `版本: ${param.seriesName}<br/>测试项: ${category}<br/>值: ${value} ${(units[category] || '')}<br/>`;
+                            });
+                            return tooltipText;
                         }
+                    },
+                     legend: {
+
+                        data: versionsArray, // 动态生成的测试项名称
+                        textStyle: {
+                            color: '#000' // 图例文字颜色
+                        },
+                        orient: 'horizontal', // 图例排列方向 (默认即为水平)
+                        bottom: 0 // 图例展示在底部
                     },
                     xAxis: {
                         type: 'category',
@@ -282,6 +419,7 @@
                     series: comparisonSeriesData
                 };
 
+                // 设置图表配置
                 comparisonChart.setOption(comparisonOption, true);
 
             }
@@ -292,36 +430,119 @@
     $(document).ready(function () {
 
 
-        var platform = $('#platform').val();
-        var branch = $('#branch').val();
-        var testType = $('#testType').val();
+        // 获取所有平台数据
+        $.ajax({
+            url: "/platforms",
+            type: "GET",
+            success: function (response) {
+                var platformSelect = $('#platform');
+                $.each(response, function (index, platform) {
+                    platformSelect.append(new Option(platform.name, platform.id));
+                });
 
-
-        // 获取版本
-        $.getJSON("/versions", {"platform": platform, "branch": branch, "testType": testType}, function (data) {
-            var versionSelect = $('#version');
-            $.each(data, function (index, value) {
-                versionSelect.append($('<option></option>').attr('value', value.name).text(value.name));
-            });
-
-            $('#version option').prop('selected', true); // 默认全选
-
-            // 触发 change 事件，以确保选项的改变被捕捉
-            $('#version').change();
+                if (response.length > 0) {
+                    // 默认选中第一项，并触发 change 事件
+                    platformSelect.val(response[0].id).change();
+                }
+            },
+            error: function (error) {
+                console.error("Error fetching platforms:", error);
+            }
         });
 
+        // 平台选择变化事件
+        $('#platform').on('change', function () {
+            var platform = $(this).val();
+            var branchSelect = $('#branch');
+            branchSelect.empty();
 
-        // 获取测试项
-        $.getJSON("/test_categories", function (data) {
+            if (platform) {
+                // 获取相关的分支数据
+                $.ajax({
+                    url: "/branches",
+                    type: "GET",
+                    data: {platform_id: platform},
+                    success: function (response) {
+                        $.each(response, function (index, branch) {
+                            branchSelect.append(new Option(branch.name, branch.id));
+                        });
+
+                        if (response.length > 0) {
+                            // 默认选中第一项，并触发 change 事件
+                            branchSelect.val(response[0].id).change();
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching branches:", error);
+                    }
+                });
+            }
+        });
+
+        // 分支选择变化事件
+        $('#branch').on('change', function () {
+            // 获取测试类型
+            $.ajax({
+                url: '/get_test_types',
+                type: 'GET',
+                success: function (response) {
+                    var testTypeSelect = $('#testType');
+                    testTypeSelect.empty();
+
+                    response.forEach(function (testType) {
+                        testTypeSelect.append(new Option(testType.name, testType.id));
+                    });
+
+                    if (response.length > 0) {
+                        // 默认选中第一项，并触发 change 事件
+                        testTypeSelect.val(response[0].id).change();
+                    }
+                    testTypeSelect.prop('disabled', false);
+                },
+                error: function (error) {
+                    console.error("Error fetching test types:", error);
+                }
+            });
+        });
+
+        // 测试类型选择变化事件
+        $('#testType').on('change', function () {
+            var testTypeId = $(this).val();
             var testCategorySelect = $('#testCategory');
-            $.each(data, function (index, value) {
-                testCategorySelect.append($('<option></option>').attr('value', value).text(value));
+            testCategorySelect.empty();
+
+            // 获取测试项
+            $.getJSON("/test_categories", {test_type_id: testTypeId}, function (data) {
+                $.each(data, function (index, value) {
+                    testCategorySelect.append(new Option(value, value));
+                });
+                if (data.length > 0) {
+                    // 默认选中所有项
+                    $('#testCategory option').prop('selected', true).change();
+                }
             });
 
-            $('#testCategory option').prop('selected', true); // 默认全选
-
-            // 触发 change 事件，以确保选项的改变被捕捉
-            $('#testCategory').change();
+            // 获取版本
+            var platform = $('#platform').val();
+            var branch = $('#branch').val();
+            var versionSelect = $('#version');
+            versionSelect.empty();
+            $.getJSON("/versions", {platform: platform, branch_id: branch, testType: testTypeId}, function (data) {
+                $.each(data, function (index, value) {
+                    versionSelect.append(new Option(value.name, value.id));
+                });
+                if (data.length > 0) {
+                    // 默认选中前4个版本
+                    let versionSelect = document.getElementById('version');
+                    for (let i = 0; i < 4; i++) {
+                        if (versionSelect.options[i]) {
+                            versionSelect.options[i].selected = true;
+                        }
+                    }
+                    // 触发 change 事件以确保选中的版本被处理
+                    versionSelect.dispatchEvent(new Event('change'));
+                }
+            });
         });
 
         // 版本控制按钮

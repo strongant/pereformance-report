@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建测试类型</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f06, #4a90e2);
+            color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 25px;
+            width: 80%;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #4a90e2;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #357ABD;
+        }
+
+        #message {
+            margin-top: 20px;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #message.success {
+            background: #28a745;
+        }
+
+        #message.error {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>创建测试类型</h1>
+    <form id="testTypeForm">
+        <input type="text" name="test_type_name" placeholder="请输入测试类型名称" required>
+        <button type="submit">创建</button>
+    </form>
+    <div id="message"></div>
+</div>
+<script>
+    document.getElementById('testTypeForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const messageElement = document.getElementById('message');
+        messageElement.style.display = 'none';  // Reset the message display
+
+        fetch('/create_test_type', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageElement.textContent = '测试类型已成功创建';
+                    messageElement.className = 'success';
+                    setTimeout(() => {
+                        window.location.reload(); // 1秒后刷新页面
+                    }, 1000); // 1000毫秒 = 1秒
+                } else {
+                    messageElement.textContent = '创建测试类型时出错: ' + data.message;
+                    messageElement.className = 'error';
+                }
+                messageElement.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageElement.textContent = '请求失败，请稍后重试';
+                messageElement.className = 'error';
+                messageElement.style.display = 'block';
+            });
+    });
+</script>
+</body>
+</html>
