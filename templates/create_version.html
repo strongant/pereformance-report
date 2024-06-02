@@ -29,20 +29,23 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            width: 300px;
+            align-items: center; /* 中心对齐 */
+            width: 320px; /* 统一表单宽度，略大于控件宽度 */
         }
 
-        label, input {
+        label, input, select, button {
             margin-bottom: 15px;
-            display: block;
-            width: 100%;
+            width: 100%; /* 确保所有表单元素宽度一致 */
         }
 
-        input[type="text"] {
+        input[type="text"], select {
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
             background-color: rgba(255, 255, 255, 0.2);
+            display: block; /* 确保块状显示 */
+            box-sizing: border-box; /* 包括padding在内计算宽度 */
+            max-width: 300px; /* 确保宽度不超过300px */
         }
 
         button {
@@ -61,31 +64,88 @@
         #message {
             margin-top: 20px;
         }
+
+        .form-control {
+            width: 100%; /* 设置为100%宽度，这样在不同设备上会自动调整 */
+            box-sizing: border-box; /* 包括padding在内计算宽度 */
+        }
+
+        @media (max-width: 600px) {
+            .form-control {
+                max-width: 100%; /* 设置最大宽度为100%，适合小屏设备 */
+            }
+        }
     </style>
 </head>
 <body>
 <h1>创建新版本</h1>
 <form id="createVersionForm">
+
+    <label for="platform">选择平台:</label>
+    <select id="platform" name="platform" class="form-control" required>
+        <!-- 平台选项会通过JavaScript进行动态加载 -->
+    </select>
+
+    <label for="branch">选择分支:</label>
+    <select id="branch" name="branch" class="form-control" required>
+        <!-- 分支选项会通过JavaScript进行动态加载 -->
+    </select>
+
     <label for="versionName">版本名称:</label>
-    <input type="text" id="versionName" name="versionName" required>
-    <button type="submit">创建版本</button>
+    <input type="text" id="versionName" name="versionName" class="form-control" required>
+
+    <button type="submit">创建</button>
+
 </form>
 <p id="message"></p>
 
 <script>
-    document.getElementById('createVersionForm').addEventListener('submit', function (event) {
-        event.preventDefault(); // 阻止表单的默认提交行为
-        const versionName = document.getElementById('versionName').value;
-        createVersion(versionName);
+    document.addEventListener('DOMContentLoaded', async () => {
+        const platformSelect = document.getElementById('platform');
+        const branchSelect = document.getElementById('branch');
+
+        // 获取平台数据
+        const platforms = await fetch('/platforms').then(response => response.json());
+        platforms.forEach(platform => {
+            const option = document.createElement('option');
+            option.value = platform.id;
+            option.text = platform.name;
+            platformSelect.appendChild(option);
+        });
+
+        // 当选择的平台改变时，更新分支选项
+        platformSelect.addEventListener('change', async () => {
+            const platformId = platformSelect.value;
+            const branches = await fetch(`/branches?platform_id=${platformId}`).then(response => response.json());
+
+            // 清空当前分支选项
+            branchSelect.innerHTML = '';
+
+            // 添加新的分支选项
+            branches.forEach(branch => {
+                const option = document.createElement('option');
+                option.value = branch.id;
+                option.text = branch.name;
+                branchSelect.appendChild(option);
+            });
+        });
     });
 
-    async function createVersion(versionName) {
+    document.getElementById('createVersionForm').addEventListener('submit', async function (event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        const versionName = document.getElementById('versionName').value;
+        const branchId = document.getElementById('branch').value;
+        const platform_id = document.getElementById('platform').value;
+        createVersion(versionName, branchId,platform_id);
+    });
+
+    async function createVersion(versionName, branchId,platform_id) {
         const response = await fetch('/versions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({name: versionName})
+            body: JSON.stringify({name: versionName, branch_id: branchId, platform_id: platform_id})
         });
 
         const messageElement = document.getElementById('message');

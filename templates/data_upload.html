@@ -66,20 +66,27 @@
         <label>
             平台：
             <select name="platform" id="platform">
-                <option value="Apls" selected>Apls</option>
-                <option value="NIO">NIO</option>
-                <!-- 你可以在此处列出所有的平台 -->
+                <option value="" selected disabled>选择平台</option>
+                <!-- 平台选项会通过JavaScript进行动态加载 -->
             </select>
         </label>
         <label>
             分支：
-            <select name="branch" id="branch">
-                <option value="dev" selected>DEV</option>
-                <option value="stage">Stage</option>
-                <!-- 在此处列出所有的分支 -->
+            <select name="branch" id="branch" disabled>
+                <option value="" selected disabled>选择分支</option>
+                <!-- 分支选项会通过JavaScript进行动态加载 -->
             </select>
         </label>
+
         <label>
+            版本：
+            <select name="version" id="version" disabled>
+                <option value="" selected disabled>选择版本</option>
+                <!-- 版本列表会在加载时自动填充 -->
+            </select>
+        </label>
+
+         <label>
             数据类型：
             <select name="test_type" id="test_type">
                 <option value="开机时序" selected>开机时序</option>
@@ -87,12 +94,7 @@
                 <option value="CPU资源">CPU资源</option>
             </select>
         </label>
-        <label>
-            版本：
-            <select name="version" id="version">
-                <!-- 版本列表会在加载时自动填充 -->
-            </select>
-        </label>
+
         <input type="file" name="data" id="data" accept=".txt">
         <button type="submit">上传</button>
     </form>
@@ -100,18 +102,68 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            // 获取所有版本的API调用
+            // 获取所有平台的API调用
             $.ajax({
-                url: '/versions',
+                url: '/platforms',
                 type: 'GET',
                 success: function (response) {
-                    var versionSelect = $('#version');
-                    response.forEach(function (version) {
-                        versionSelect.append(new Option(version.name, version.name));
+                    var platformSelect = $('#platform');
+                    response.forEach(function (platform) {
+                        platformSelect.append(new Option(platform.name, platform.id));
                     });
                 },
                 error: function (error) {
-                    console.error("Error fetching versions:", error);
+                    console.error("Error fetching platforms:", error);
+                }
+            });
+
+            // 当平台改变时，获取相关的分支
+            $('#platform').on('change', function() {
+                var platformId = $(this).val();
+                if (platformId) {
+                    $('#branch').prop('disabled', false);
+                    $.ajax({
+                        url: `/branches?platform_id=${platformId}`,
+                        type: 'GET',
+                        success: function (response) {
+                            var branchSelect = $('#branch');
+                            branchSelect.empty().append(new Option('选择分支', '', true, true));
+                            $('#version').empty().append(new Option('选择版本', '', true, true)).prop('disabled', true);
+                            response.forEach(function (branch) {
+                                branchSelect.append(new Option(branch.name, branch.id));
+                            });
+                        },
+                        error: function (error) {
+                            console.error("Error fetching branches:", error);
+                        }
+                    });
+                } else {
+                    $('#branch').prop('disabled', true);
+                    $('#version').prop('disabled', true);
+                }
+            });
+
+            // 当分支改变时，获取相关的版本
+            $('#branch').on('change', function() {
+                var branchId = $(this).val();
+                if (branchId) {
+                    $('#version').prop('disabled', false);
+                    $.ajax({
+                        url: `/versions?branch_id=${branchId}`,
+                        type: 'GET',
+                        success: function (response) {
+                            var versionSelect = $('#version');
+                            versionSelect.empty().append(new Option('选择版本', '', true, true));
+                            response.forEach(function (version) {
+                                versionSelect.append(new Option(version.name, version.name));
+                            });
+                        },
+                        error: function (error) {
+                            console.error("Error fetching versions:", error);
+                        }
+                    });
+                } else {
+                    $('#version').prop('disabled', true);
                 }
             });
 

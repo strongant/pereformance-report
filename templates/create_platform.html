@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建平台</title>
+    <style>
+      /* 公共样式 */
+      body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #f06, #4a90e2);
+          color: #333;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+      }
+
+      h1 {
+          margin-bottom: 20px;
+          color: #fff;
+      }
+
+      form {
+          background: rgba(255, 255, 255, 0.9);
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 320px;
+      }
+
+      label, input, select, button {
+          margin-bottom: 15px;
+          width: 100%;
+      }
+
+      input[type="text"], select {
+          padding: 10px;
+          border-radius: 5px;
+          border: 1px solid #ccc;
+          background-color: rgba(255, 255, 255, 0.2);
+          display: block;
+          box-sizing: border-box;
+          max-width: 300px;
+      }
+
+      button {
+          padding: 10px;
+          border: none;
+          border-radius: 5px;
+          background-color: #007bff;
+          color: white;
+          cursor: pointer;
+      }
+
+      button:hover {
+          background-color: #0056b3;
+      }
+
+      #message {
+          margin-top: 20px;
+      }
+
+      @media (max-width: 600px) {
+          .form-control {
+              max-width: 100%;
+          }
+      }
+    </style>
+</head>
+<body>
+<h1>创建平台</h1>
+<form id="createPlatformForm">
+    <label for="platformName">平台名称:</label>
+    <input type="text" id="platformName" name="platformName" required>
+    <button type="submit">创建</button>
+</form>
+<p id="message"></p>
+
+<script>
+    document.getElementById('createPlatformForm').addEventListener('submit', async function (event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        const platformName = document.getElementById('platformName').value;
+        createPlatform(platformName);
+    });
+
+    async function createPlatform(platformName) {
+        const response = await fetch('/platforms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: platformName })
+        });
+
+        const messageElement = document.getElementById('message');
+
+        if (response.ok) {
+            messageElement.textContent = '平台创建成功';
+            messageElement.style.color = 'green';
+            setTimeout(() => {
+                window.location.reload(); // 1秒后刷新页面
+            }, 1000); // 1000毫秒 = 1秒
+        } else {
+            // 如果创建失败，显示从服务器返回的错误消息
+            const errorData = await response.json();
+            messageElement.textContent = `平台创建失败: ${errorData.error}`;
+            messageElement.style.color = 'red';
+        }
+    }
+</script>
+</body>
+</html>
